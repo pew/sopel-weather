@@ -2,7 +2,7 @@
 
 get current weather and three day forecast for a location.
 
-## requirements * installation
+## requirements & installation
 
 * get an api key from [OpenWeather](https://openweathermap.org/)
 * insert OpenWeather API key into `module.py`

@@ -9,13 +9,15 @@ API_KEY = "insert_api_key_here"
 
 def weather(wt, location):
     payload = {"q": location, "units": "metric", "APPID": API_KEY}
-    req = requests.get(
-        "https://api.openweathermap.org/data/2.5/{}".format(wt), params=payload
-    )
+
     if wt == "daily":
         req = requests.get(
             "https://api.openweathermap.org/data/2.5/forecast/daily?cnt=3",
             params=payload,
+        )
+    else:
+        req = requests.get(
+            "https://api.openweathermap.org/data/2.5/{}".format(wt), params=payload
         )
     if req.status_code != 200:
         return "error code: ", req.status_code

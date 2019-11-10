@@ -1,2 +1,3 @@
-# sopel-weather
-weather module for sopel irc bot
+# sopel weather
+
+weather conditions for sopel irc bot. requires an openweathermap.org api key

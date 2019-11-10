@@ -20,7 +20,7 @@ def weather(wt, location):
             "https://api.openweathermap.org/data/2.5/{}".format(wt), params=payload
         )
     if req.status_code != 200:
-        return "error code: ", req.status_code
+        raise ConnectionError("error code: ", req.status_code)
     response = req.json()
     return response
 
@@ -31,16 +31,21 @@ def w(bot, trigger):
         return bot.reply("please provide a location.")
     query = trigger.group(2)
 
-    current_weather = weather("weather", query)
-    bot.say(
-        "Weather for: {} | current temperature: {}°C | min. temperature: {}°C | max. temperature {}°C | {}".format(
-            current_weather["name"],
-            current_weather["main"]["temp"],
-            current_weather["main"]["temp_min"],
-            current_weather["main"]["temp_max"],
-            current_weather["weather"][0]["description"],
+    try:
+        current_weather = weather("weather", query)
+    except (ConnectionError, TypeError) as err:
+        return bot.say(str(err))
+    else:
+        bot.say(
+            "Weather for: {}, {} | cur. temp: {}°C | min. temp: {}°C | max. temp: {}°C | {}".format(
+                current_weather["name"],
+                current_weather["sys"]["country"],
+                current_weather["main"]["temp"],
+                current_weather["main"]["temp_min"],
+                current_weather["main"]["temp_max"],
+                current_weather["weather"][0]["description"],
+            )
         )
-    )
 
 
 @sopel.module.commands("forecast")
@@ -49,18 +54,21 @@ def f(bot, trigger):
         return bot.reply("please provide a location.")
     query = trigger.group(2)
 
-    forecast_weather = weather("daily", query)
+    try:
+        forecast_weather = weather("daily", query)
+    except (ConnectionError, TypeError) as err:
+        return bot.say(str(err))
+    else:
+        for day in forecast_weather["list"]:
+            dt = datetime.datetime.fromtimestamp(day["dt"]).strftime("%Y-%m-%d")
 
-    for day in forecast_weather["list"]:
-        dt = datetime.datetime.fromtimestamp(day["dt"]).strftime("%Y-%m-%d")
-
-        bot.say(
-            "Weather for: {}, {} | {}: {}°C | min. temperature: {}°C | max. temperature {}°C".format(
-                forecast_weather["city"]["name"],
-                forecast_weather["city"]["country"],
-                dt,
-                day["temp"]["day"],
-                day["temp"]["max"],
-                day["temp"]["min"],
+            bot.say(
+                "Weather for: {}, {} | {}: avg. temp: {}°C | min. temp: {}°C | max. temp: {}°C".format(
+                    forecast_weather["city"]["name"],
+                    forecast_weather["city"]["country"],
+                    dt,
+                    day["temp"]["day"],
+                    day["temp"]["max"],
+                    day["temp"]["min"],
+                )
             )
-        )

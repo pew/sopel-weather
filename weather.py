@@ -1,12 +1,10 @@
 import datetime
-import os
 
 import requests
-from sopel import module
+import sopel
 
-API_KEY = os.getenv("owm_api_key")
-if not API_KEY:
-    print("please set an API KEY env. var: owm_api_key")
+
+API_KEY = "insert_api_key_here"
 
 
 def weather(wt, location):
@@ -25,9 +23,13 @@ def weather(wt, location):
     return response
 
 
-@sopel.module.commands("w")
+@sopel.module.commands("weather")
 def w(bot, trigger):
-    current_weather = weather("weather", trigger)
+    if not trigger.group(2):
+        return bot.reply("please provide a location.")
+    query = trigger.group(2)
+
+    current_weather = weather("weather", query)
     bot.say(
         "Weather for: {} | current temperature: {}°C | min. temperature: {}°C | max. temperature {}°C | {}".format(
             current_weather["name"],
@@ -39,9 +41,13 @@ def w(bot, trigger):
     )
 
 
-@sopel.module.commands("f")
+@sopel.module.commands("forecast")
 def f(bot, trigger):
-    forecast_weather = weather("daily", trigger)
+    if not trigger.group(2):
+        return bot.reply("please provide a location.")
+    query = trigger.group(2)
+
+    forecast_weather = weather("daily", query)
 
     for day in forecast_weather["list"]:
         dt = datetime.datetime.fromtimestamp(day["dt"]).strftime("%Y-%m-%d")

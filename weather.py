@@ -3,14 +3,31 @@ import datetime
 
 import requests
 import sopel
+from sopel.config.types import NO_DEFAULT, StaticSection, ValidatedAttribute
 
 
-API_KEY = "insert_api_key_here"
+class WeatherSection(StaticSection):
+    """config section for sopel"""
+
+    api_key = ValidatedAttribute("api_key", default=NO_DEFAULT)
 
 
-def get_weather(location, weather_type=None):
+def setup(bot):
+    """setup bot"""
+    bot.config.define_section("weather", WeatherSection)
+
+
+def configure(config):
+    """define / setup bot configuration and api key"""
+    config.define_section("weather", WeatherSection)
+    config.weather.configure_setting(
+        "api_key", "Please set an openweathermap.org api key"
+    )
+
+
+def get_weather(location, weather_type=None, api_key=None):
     """get current weather or forecast"""
-    payload = {"q": location, "units": "metric", "APPID": API_KEY}
+    payload = {"q": location, "units": "metric", "APPID": api_key}
 
     if weather_type == "daily":
         req = requests.get(
@@ -38,7 +55,7 @@ def weather(bot, trigger):
     query = trigger.group(2)
 
     try:
-        current_weather = get_weather(query)
+        current_weather = get_weather(query, api_key=bot.config.weather.api_key)
     except ConnectionError as err:
         return bot.say(str(err))
     else:
@@ -62,7 +79,7 @@ def forecast(bot, trigger):
     query = trigger.group(2)
 
     try:
-        forecast_weather = get_weather(query, "daily")
+        forecast_weather = get_weather(query, "daily", bot.config.weather.api_key)
     except ConnectionError as err:
         return bot.say(str(err))
     else:

@@ -28,3 +28,15 @@ three day forecast for a given location:
 ```
 .forecast berlin
 ```
+
+save location for your user:
+
+```
+.setweatherlocation tokyo
+```
+
+remove location for your user:
+
+```
+.setweatherlocation
+```

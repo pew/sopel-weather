@@ -50,9 +50,16 @@ def get_weather(location, weather_type=None, api_key=None):
 @sopel.module.commands("weather")
 def weather(bot, trigger):
     """current weather trigger"""
-    if not trigger.group(2):
-        return bot.reply("please provide a location.")
+
+    # get location, if provided
     query = trigger.group(2)
+
+    # get default location
+    if not query:
+        query = bot.db.get_nick_value(trigger.nick, "weather_location")
+    # if nothing found, tell 'em
+    if not query:
+        return bot.reply("please provide a location.")
 
     try:
         current_weather = get_weather(query, api_key=bot.config.weather.api_key)
@@ -74,9 +81,16 @@ def weather(bot, trigger):
 @sopel.module.commands("forecast")
 def forecast(bot, trigger):
     """forecast weather trigger"""
-    if not trigger.group(2):
-        return bot.reply("please provide a location.")
+
+    # get location, if provided
     query = trigger.group(2)
+
+    # get default location
+    if not query:
+        query = bot.db.get_nick_value(trigger.nick, "weather_location")
+    # if nothing found, tell 'em
+    if not query:
+        return bot.reply("please provide a location.")
 
     try:
         forecast_weather = get_weather(query, "daily", bot.config.weather.api_key)
@@ -96,3 +110,17 @@ def forecast(bot, trigger):
                     day["temp"]["min"],
                 )
             )
+
+
+@sopel.module.commands("setweatherloc", "setweatherlocation")
+@sopel.module.example(".setweatherlocation Tokyo")
+def set_weather_location(bot, trigger):
+    """set location for weather"""
+
+    argument = trigger.group(2)
+    if not argument:
+        bot.db.set_nick_value(trigger.nick, "weather_location", argument)
+        return bot.reply("deleted your location")
+
+    bot.db.set_nick_value(trigger.nick, "weather_location", argument)
+    return bot.reply("%s is your location." % argument)

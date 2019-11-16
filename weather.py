@@ -110,6 +110,7 @@ def forecast(bot, trigger):
                     day["temp"]["min"],
                 )
             )
+    return None
 
 
 @sopel.module.commands("setweatherloc", "setweatherlocation")
@@ -120,7 +121,7 @@ def set_weather_location(bot, trigger):
     argument = trigger.group(2)
     if not argument:
         bot.db.set_nick_value(trigger.nick, "weather_location", argument)
-        return bot.reply("deleted your location")
+        return bot.reply("deleted your location.")
 
     bot.db.set_nick_value(trigger.nick, "weather_location", argument)
-    return bot.reply("%s is your location." % argument)
+    return bot.reply("set %s as your location." % argument)

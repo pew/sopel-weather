@@ -48,8 +48,9 @@ def get_weather(location, weather_type=None, api_key=None):
 
 
 @sopel.module.commands("weather")
+@sopel.module.example(".weather London")
 def weather(bot, trigger):
-    """current weather trigger"""
+    """get current weather conditions"""
 
     # get location, if provided
     query = trigger.group(2)
@@ -79,8 +80,9 @@ def weather(bot, trigger):
 
 
 @sopel.module.commands("forecast")
+@sopel.module.example(".forecast New York")
 def forecast(bot, trigger):
-    """forecast weather trigger"""
+    """get weather forecast"""
 
     # get location, if provided
     query = trigger.group(2)
@@ -97,17 +99,17 @@ def forecast(bot, trigger):
     except ConnectionError as err:
         return bot.say(str(err))
     else:
+        bot.say(
+            "Forecast for {}, {}:".format(
+                forecast_weather["city"]["name"], forecast_weather["city"]["country"]
+            )
+        )
         for day in forecast_weather["list"]:
             timestamp = datetime.datetime.fromtimestamp(day["dt"]).strftime("%Y-%m-%d")
 
             bot.say(
-                "Forecast for: {}, {} | {}: avg. temp: {}°C | min. temp: {}°C | max. temp: {}°C".format(
-                    forecast_weather["city"]["name"],
-                    forecast_weather["city"]["country"],
-                    timestamp,
-                    day["temp"]["day"],
-                    day["temp"]["max"],
-                    day["temp"]["min"],
+                "{}: avg. temp: {}°C | {}".format(
+                    timestamp, day["temp"]["day"], day["weather"][0]["description"]
                 )
             )
     return None
@@ -116,7 +118,7 @@ def forecast(bot, trigger):
 @sopel.module.commands("setweatherloc", "setweatherlocation")
 @sopel.module.example(".setweatherlocation Tokyo")
 def set_weather_location(bot, trigger):
-    """set location for weather"""
+    """save location for user to retrieve weather information"""
 
     argument = trigger.group(2)
     if not argument:
